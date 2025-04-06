@@ -1,0 +1,47 @@
+# my global config
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # You can uncomment and add your alertmanager like this:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["44.223.93.55:9100"]
+        labels:
+          app: "prometheus"
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]  # Look for a HTTP 200 response.
+
+    static_configs:
+      - targets:
+          - https://github.com/jaiswaladi246/Task-Master-Pro  # Target to probe with https.
+          - http://44.223.93.55:8080                           # Target to probe with http on port 8080.
+
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 44.201.14.56:9115  # The blackbox exporter's real hostname:port.
